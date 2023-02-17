@@ -21,6 +21,13 @@ TRACKSIM_API_KEY=your-api-key
 
 ### Example
 
+Add a Driver to Company.
+```php
+$client = new Client();
+
+$client->addDriver($steam_id);
+```
+
 
 ## Credits
 

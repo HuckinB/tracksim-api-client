@@ -1,0 +1,24 @@
+{
+    "name": "huckinb/tracksim-php-client",
+    "description": "PHP client for the TrackSim API",
+    "version": "1.0.0",
+    "require": {
+        "php": "^7.4",
+        "guzzlehttp/guzzle": "^6.5|^7.5"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "HuckinB\\TrackSimClient\\TrackSimClientProvider"
+            ]
+        }
+    },
+    "autoload":     {
+        "psr-4": {
+            "HuckinB\\TrackSimClient\\": "src/"
+        },
+        "classmap": [
+            "src/"
+        ]
+    }
+}

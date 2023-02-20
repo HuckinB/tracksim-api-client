@@ -86,6 +86,11 @@ class Driver
         return $this->avatar;
     }
 
+    public function getClient(): TrackerClient
+    {
+        return $this->client;
+    }
+
     public function getSettings(): DriverSettings
     {
         return $this->settings;

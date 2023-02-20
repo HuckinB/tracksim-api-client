@@ -31,7 +31,7 @@ class TrackerClient
         return $this->installed;
     }
 
-    public function getClient(): ClientVersion
+    public function getVersion(): ClientVersion
     {
         return $this->version;
     }

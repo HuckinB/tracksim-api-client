@@ -3,7 +3,6 @@
 namespace HuckinB\TrackSimClient;
 
 use Illuminate\Support\ServiceProvider;
-use HuckinB\TrackSimClient\Client;
 
 class TrackSimClientProvider extends ServiceProvider
 {

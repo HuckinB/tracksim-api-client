@@ -40,6 +40,13 @@ class Driver
     protected TrackerClient $client;
 
     /**
+     * The options the driver has set.
+     *
+     * @var DriverSettings $settings
+     */
+    protected DriverSettings $settings;
+
+    /**
      * Whether the user is banned from Navio.
      *
      * @var boolean
@@ -49,12 +56,14 @@ class Driver
     /**
      * Create a new Driver Instance
      */
-    public function __construct($data) {
+    public function __construct($data)
+    {
         $this->id = $data->id;
         $this->steamId = $data->steam_id;
         $this->username = $data->username;;
         $this->avatar = $data->profile_photo_url;
         $this->client = new TrackerClient($data->client);
+        $this->settings = new DriverSettings($data->settings);
         $this->isBanned = $data->is_banned;
     }
 
@@ -76,6 +85,16 @@ class Driver
     public function getAvatar(): string
     {
         return $this->avatar;
+    }
+
+    public function getClient(): TrackerClient
+    {
+        return $this->client;
+    }
+
+    public function getSettings(): DriverSettings
+    {
+        return $this->settings;
     }
 
     public function isBanned(): bool

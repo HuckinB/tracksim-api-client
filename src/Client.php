@@ -19,97 +19,70 @@ class Client
      */
     public function __construct($apikey = null)
     {
-        if(config('tracksim.apikey') !== null) {
+        if (config('tracksim.apikey') !== null) {
             $apikey = config('tracksim.apikey');
         }
 
-        if(!isset($apikey)) {
-            throw new \Exception('No API Key provided');
+        if (!isset($apikey)) {
+            throw new Exception('The API key is not set');
         }
 
         $base_url = 'https://api.tracksim.app/';
         $version = 'v1';
 
-       $defaultOptions = [
-           'base_uri' => $base_url . $version . '/',
-           'verify' => false,
-           'headers'  => [
-               'Authorization' => 'Api-Key ' . $apikey,
-               'Accept'        => 'application/json',
-               'Content-Type'  => 'application/json',
-               'User-Agent'    => 'TrackSim PHP Client v' . \Composer\InstalledVersions::getVersion('huckinb/tracksim-php-client'),
-           ]
-       ];
+        $defaultOptions = [
+            'base_uri' => $base_url . $version . '/',
+            'verify' => false,
+            'headers' => [
+                'Authorization' => 'Api-Key ' . $apikey,
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'TrackSim PHP Client v' . \Composer\InstalledVersions::getVersion('huckinb/tracksim-php-client'),
+            ]
+        ];
 
-       $this->client = new GuzzleClient($defaultOptions);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    private function get($endpoint)
-    {
-        try {
-            $response = $this->client->get($endpoint);
-        } catch (GuzzleException $e) {
-            if ($e->getCode() === 401) {
-                throw new \RuntimeException('Invalid API Key');
-            }
-
-            throw $e;
-        }
-
-        return json_decode($response->getBody()->getContents());
-    }
-
-    /**
-     * @throws \Exception
-     */
-    private function post($endpoint, $data = null)
-    {
-        $response = $this->client->post($endpoint, [
-            'json' => $data
-        ]);
-
-        return $response;
-    }
-
-    /**
-     * @throws \Exception
-     */
-    private function delete($endpoint, $data = null)
-    {
-        $response = $this->client->delete($endpoint, [
-            'json' => $data
-        ]);
-
-        return $response;
+        $this->client = new GuzzleClient($defaultOptions);
     }
 
     /**
      * This method returns the company details for the company that the API key belongs to.
      *
-     * @throws \Exception
-     *
      * @return Company
+     * @throws Exception|GuzzleException
+     *
      */
-    public function company()
+    public function company(): Company
     {
         $response = $this->get('me');
+
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception('Unable to get company details');
+        }
+
+        $response = json_decode($response->getBody()->getContents(), false);
 
         return new Company($response);
     }
 
     /**
+     * @throws GuzzleException
+     */
+    private function get($endpoint)
+    {
+        return $this->client->get($endpoint);
+    }
+
+    /**
      * This method will add a driver to the company.
      *
-     * @param int|null $steam64
-     * @throws \Exception
+     * @param int $steam64
+     * @return Driver
+     * @throws Exception
      */
-    public function addDriver(int $steam64 = null)
+    public function addDriver(int $steam64): Driver
     {
-        if(!isset($steam64)) {
-            throw new \Exception('No Steam64 ID provided');
+        if (!isset($steam64)) {
+            throw new Exception('No Steam64 ID provided');
         }
 
         try {
@@ -117,24 +90,53 @@ class Client
                 'steam_id' => $steam64
             ]);
         } catch (GuzzleException $e) {
-            throw $e;
+            $response = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($response->error) {
+                case 'steam_profile_private':
+                    throw new Exception('The requested steam user profile is private');
+                    break;
+                case 'resource_already_exists':
+                    throw new Exception('The selected driver is already connected to your company');
+                    break;
+                case 'driver_no_compatible_games':
+                    throw new Exception('The requested steam user doesn\'t own ETS2 or ATS (This could be due to it being private on their profile)');
+                    break;
+                case 'max_driver_limit_reached ':
+                    throw new Exception('The maximum amount of drivers has been reached');
+                    break;
+                default:
+                    throw new Exception($e->getMessage());
+                    break;
+            }
         }
 
-        $data = json_decode($response->getBody()->getContents());
+        $response = json_decode($response->getBody()->getContents(), false);
 
-        return new Driver($data);
+        return new Driver($response);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    private function post($endpoint, $data = null)
+    {
+        return $this->client->post($endpoint, [
+            'json' => $data
+        ]);
     }
 
     /**
      * This method will remove a driver from the company.
      *
-     * @param int|null $steam64
-     * @throws \Exception
+     * @param int $steam64
+     * @return bool
+     * @throws Exception|GuzzleException
      */
-    public function removeDriver(int $steam64 = null)
+    public function removeDriver(int $steam64): bool
     {
-        if(!isset($steam64)) {
-            throw new \Exception('No Steam64 ID provided');
+        if (!isset($steam64)) {
+            throw new Exception('No Steam64 ID provided');
         }
 
         try {
@@ -142,29 +144,126 @@ class Client
                 'steam_id' => $steam64
             ]);
         } catch (GuzzleException $e) {
-            throw $e;
+            $response = json_decode($e->getResponse()->getBody()->getContents(), false);
+
+            if ($response->error === 'resource_not_found') {
+                throw new Exception('The selected driver is not connected to your company');
+            }
+
+            throw new Exception($e->getMessage());
         }
 
         return $response->getStatusCode() === 200;
     }
 
     /**
-     * This method will return a list of drivers for the company.
-     *
-     * @throws \Exception
-     *
-     * @return Driver[]
+     * @throws GuzzleException
      */
-    public function getDrivers()
+    private function delete($endpoint, $data = null)
     {
-        $response = $this->get('drivers');
+        return $this->client->delete($endpoint, [
+            'json' => $data
+        ]);
+    }
 
-        $drivers = [];
-
-        foreach ($response as $driver) {
-            $drivers[] = new Driver($driver);
+    /**
+     * This method will return a driver from the company.
+     *
+     * @param $steam64
+     * @return Driver
+     * @throws Exception
+     */
+    public function getDriver($steam64): Driver
+    {
+        if (!isset($steam64)) {
+            throw new Exception('No Steam64 ID provided');
         }
 
-        return $drivers;
+        try {
+            $response = $this->get('drivers/' . $steam64 . '/details');
+        } catch (GuzzleException $e) {
+            $response = json_decode($e->getResponse()->getBody()->getContents(), false);
+
+            if ($response->error === 'driver_does_not_exist_in_company') {
+                throw new Exception('The selected driver is not connected to your company');
+            }
+
+            throw new Exception($e->getMessage());
+        }
+
+        $response = json_decode($response->getBody()->getContents(), false);
+
+        return new Driver($response);
+    }
+
+    /**
+     * This method will allow you to update a driver's settings.
+     *
+     * @param $steam64
+     * @param array $data
+     *
+     * @return Driver
+     *
+     * @throws Exception
+     */
+    public function updateDriver($steam64, array $data): Driver
+    {
+        if (!isset($steam64)) {
+            throw new Exception('No Steam64 ID provided');
+        }
+
+        $allowedFields = [
+            'eut2_job_logging',
+            'eut2_live_tracking',
+            'ats_job_logging',
+            'ats_live_tracking',
+        ];
+
+        foreach ($allowedFields as $field) {
+            if (!isset($data[$field])) {
+                throw new Exception('Missing field: ' . $field);
+            }
+
+            if (!is_bool($data[$field])) {
+                throw new Exception('Field ' . $field . ' must be a boolean');
+            }
+        }
+
+        try {
+            $response = $this->patch('drivers/' . $steam64 . '/manage', $data);
+        } catch (GuzzleException $e) {
+            $response = json_decode($e->getResponse()->getBody()->getContents(), false);
+
+            if (is_object($response->error)) {
+                $message = '';
+                foreach ($response->error as $errors) {
+                    foreach ($errors as $error) {
+                        $message .= $error . ' ';
+                    }
+                }
+
+                throw new Exception($message);
+            }
+
+            if ($response->error === 'driver_does_not_exist_in_company') {
+                throw new Exception('The selected driver is not connected to your company');
+            }
+
+            throw new Exception($e->getMessage());
+        }
+
+        $response = json_decode($response->getBody()->getContents(), false);
+
+        return new Driver($response);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    private function patch($endpoint, $data = null)
+    {
+        return $this->client->patch($endpoint, [
+            'json' => $data
+        ]);
     }
 }

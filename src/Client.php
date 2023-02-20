@@ -59,9 +59,9 @@ class Client
             throw new Exception('Unable to get company details');
         }
 
-        $data = json_decode($response->getBody()->getContents(), false);
+        $response = json_decode($response->getBody()->getContents(), false);
 
-        return new Company($data);
+        return new Company($response);
     }
 
     /**
@@ -111,9 +111,9 @@ class Client
             }
         }
 
-        $data = json_decode($response->getBody()->getContents(), false);
+        $response = json_decode($response->getBody()->getContents(), false);
 
-        return new Driver($data);
+        return new Driver($response);
     }
 
     /**
@@ -191,9 +191,9 @@ class Client
             throw new Exception($e->getMessage());
         }
 
-        $data = json_decode($response->getBody()->getContents(), false);
+        $response = json_decode($response->getBody()->getContents(), false);
 
-        return new Driver($data);
+        return new Driver($response);
     }
 
     /**

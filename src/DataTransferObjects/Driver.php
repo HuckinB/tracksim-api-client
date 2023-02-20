@@ -56,7 +56,8 @@ class Driver
     /**
      * Create a new Driver Instance
      */
-    public function __construct($data) {
+    public function __construct($data)
+    {
         $this->id = $data->id;
         $this->steamId = $data->steam_id;
         $this->username = $data->username;;

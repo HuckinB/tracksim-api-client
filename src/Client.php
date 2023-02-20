@@ -201,7 +201,7 @@ class Client
      *
      * @param $steam64
      * @param array $data
-     * 
+     *
      * @return Driver
      *
      * @throws Exception
@@ -219,12 +219,12 @@ class Client
             'ats_live_tracking',
         ];
 
-        foreach($allowedFields as $field) {
-            if(!isset($data[$field])) {
+        foreach ($allowedFields as $field) {
+            if (!isset($data[$field])) {
                 throw new Exception('Missing field: ' . $field);
             }
 
-            if(!is_bool($data[$field])) {
+            if (!is_bool($data[$field])) {
                 throw new Exception('Field ' . $field . ' must be a boolean');
             }
         }
@@ -234,10 +234,10 @@ class Client
         } catch (GuzzleException $e) {
             $response = json_decode($e->getResponse()->getBody()->getContents(), false);
 
-            if(is_object($response->error)) {
+            if (is_object($response->error)) {
                 $message = '';
-                foreach($response->error as $errors) {
-                    foreach($errors as $error) {
+                foreach ($response->error as $errors) {
+                    foreach ($errors as $error) {
                         $message .= $error . ' ';
                     }
                 }

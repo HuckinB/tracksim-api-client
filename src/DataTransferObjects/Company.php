@@ -11,7 +11,7 @@ class Company
      */
     protected int $id;
 
-/**
+    /**
      * The company's name.
      *
      * @var string

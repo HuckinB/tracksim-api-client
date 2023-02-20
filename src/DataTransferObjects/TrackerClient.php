@@ -5,7 +5,7 @@ namespace HuckinB\TrackSimClient\DataTransferObjects;
 class TrackerClient
 {
     /**
-     + Does the user have the client installed.
+     * + Does the user have the client installed.
      *
      * @var bool $installed
      */
@@ -21,7 +21,8 @@ class TrackerClient
     /**
      * Create a new TrackerClient Instance
      */
-    public function __construct($data) {
+    public function __construct($data)
+    {
         $this->installed = $data->is_installed;
         $this->version = new ClientVersion($data->version);
     }

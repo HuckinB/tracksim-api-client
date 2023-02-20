@@ -35,7 +35,8 @@ class DriverSettings
     /**
      * Create a new Driver Settings Instance
      */
-    public function __construct($data) {
+    public function __construct($data)
+    {
         $this->eut2_job_logging = $data->eut2->job_logging;
         $this->eut2_live_tracking = $data->eut2->live_tracking;
         $this->ats_job_logging = $data->ats->job_logging;

@@ -42,9 +42,9 @@ class Driver
     /**
      * The options the driver has set.
      *
-     * @var DriverSettings $settings
+     * @var DriverSettings|null $settings
      */
-    protected DriverSettings $settings;
+    protected ?DriverSettings $settings;
 
     /**
      * Whether the user is banned from Navio.
@@ -63,7 +63,7 @@ class Driver
         $this->username = $data->username;;
         $this->avatar = $data->profile_photo_url;
         $this->client = new TrackerClient($data->client);
-        $this->settings = new DriverSettings($data->settings);
+        $this->settings = isset($data->settings) ? new DriverSettings($data->settings) : null;
         $this->isBanned = $data->is_banned;
     }
 
@@ -92,9 +92,9 @@ class Driver
         return $this->client;
     }
 
-    public function getSettings(): DriverSettings
+    public function getSettings(): ?DriverSettings
     {
-        return $this->settings;
+        return $this->settings ?? null;
     }
 
     public function isBanned(): bool

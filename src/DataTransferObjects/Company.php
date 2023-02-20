@@ -33,6 +33,20 @@ class Company
     protected DiscordRichPresence $richPresence;
 
     /**
+     * The number of drivers in the company.
+     *
+     * @var int
+     */
+    protected int $driverCount;
+
+    /**
+     * The maximum number of drivers allowed in the plan.
+     *
+     * @var int
+     */
+    protected int $maxDriverCount;
+
+    /**
      * Create a new Company Instance
      */
     public function __construct($data)
@@ -41,6 +55,8 @@ class Company
         $this->name = $data->name;
         $this->logo = $data->logo_url;
         $this->richPresence = new DiscordRichPresence($data->discord_rpc);
+        $this->driverCount = $data->driver_count->current;
+        $this->maxDriverCount = $data->driver_count->max;
     }
 
     public function getId(): int
@@ -61,5 +77,15 @@ class Company
     public function getRichPresence(): DiscordRichPresence
     {
         return $this->richPresence;
+    }
+
+    public function getDriverCount(): int
+    {
+        return $this->driverCount;
+    }
+
+    public function getMaxDriverCount(): int
+    {
+        return $this->maxDriverCount;
     }
 }

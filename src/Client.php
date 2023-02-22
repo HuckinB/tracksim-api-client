@@ -258,6 +258,34 @@ class Client
     }
 
     /**
+     * This method will return a true or false if the driver is in the company.
+     *
+     * @param $steam64
+     *
+     * @return bool
+     */
+    public function driverExists($steam64): bool
+    {
+        if (!isset($steam64)) {
+            throw new Exception('No Steam64 ID provided');
+        }
+
+        try {
+            $response = $this->get('drivers/' . $steam64 . '/details');
+        } catch (GuzzleException $e) {
+            $response = json_decode($e->getResponse()->getBody()->getContents(), false);
+
+            if ($response->error === 'driver_does_not_exist_in_company') {
+                return false;
+            }
+
+            throw new Exception($e->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
      * @throws GuzzleException
      */
     private function patch($endpoint, $data = null)

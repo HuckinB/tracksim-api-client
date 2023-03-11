@@ -1,7 +1,7 @@
 {
     "name": "huckinb/tracksim-php-client",
     "description": "PHP client for the TrackSim API",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "require": {
         "php": "^7.4",
         "guzzlehttp/guzzle": "^6.5|^7.5"

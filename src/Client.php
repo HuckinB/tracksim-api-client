@@ -294,4 +294,28 @@ class Client
             'json' => $data
         ]);
     }
+	
+	/**
+     * This method will return a the route of the job.
+     *
+     * @param $job_id
+     */
+	public function getRoute($job_id)
+    {
+        if (!isset($job_id)) {
+            throw new Exception('No Job ID provided');
+        }
+
+        try {
+            $response = $this->get('jobs/' . $job_id . '/route');
+        } catch (GuzzleException $e) {
+            $response = json_decode($e->getResponse()->getBody()->getContents(), false);
+
+            throw new Exception($e->getMessage());
+        }
+
+        $response = json_decode($response->getBody()->getContents(), false);
+
+        return $response;
+    }
 }
